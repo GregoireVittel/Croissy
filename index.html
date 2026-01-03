@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather - Croissy-sur-Seine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(180deg, #3e4c7a 0%, #2d3752 100%);
+            color: white;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .location {
+            font-size: 1.5em;
+            font-weight: 500;
+        }
+
+        .current-weather-section {
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .current-header {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .current-time {
+            font-size: 0.85em;
+            opacity: 0.7;
+            margin-bottom: 20px;
+        }
+
+        .current-main {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .temp-display {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .weather-icon-large {
+            font-size: 5em;
+        }
+
+        .temp-large {
+            font-size: 5em;
+            font-weight: 300;
+            line-height: 1;
+        }
+
+        .weather-description {
+            margin-top: 10px;
+        }
+
+        .description-main {
+            font-size: 1.3em;
+            margin-bottom: 5px;
+        }
+
+        .description-detail {
+            font-size: 0.95em;
+            opacity: 0.8;
+        }
+
+        .current-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .detail-label {
+            font-size: 0.85em;
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .detail-value {
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .tabs-section {
+            margin-bottom: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.08);
+            border: none;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 0.95em;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: #ffd966;
+            color: #2d3752;
+            font-weight: 500;
+        }
+
+        .tab:hover:not(.active) {
+            background: rgba(255,255,255,0.12);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .forecast-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .forecast-card:hover {
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-2px);
+        }
+
+        .forecast-day {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .forecast-date {
+            font-size: 0.8em;
+            opacity: 0.6;
+            margin-bottom: 10px;
+        }
+
+        .forecast-icon {
+            font-size: 2.5em;
+            margin: 10px 0;
+        }
+
+        .forecast-temp {
+            font-size: 1.3em;
+            margin: 10px 0;
+        }
+
+        .forecast-detail {
+            font-size: 0.8em;
+            opacity: 0.7;
+            margin: 5px 0;
+        }
+
+        .precipitation-chart {
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            height: 300px;
+            position: relative;
+        }
+
+        .chart-title {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .hourly-grid {
+            display: flex;
+            gap: 5px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .hourly-item {
+            min-width: 80px;
+            text-align: center;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .hourly-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .hourly-time {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .hourly-icon {
+            font-size: 1.8em;
+            margin: 5px 0;
+        }
+
+        .hourly-temp {
+            font-size: 1.1em;
+            font-weight: 500;
+            margin: 5px 0;
+        }
+
+        .hourly-precip {
+            font-size: 0.75em;
+            opacity: 0.7;
+            color: #64b5f6;
+        }
+
+        .daily-forecast {
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 30px;
+        }
+
+        .daily-title {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .daily-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .daily-item {
+            display: grid;
+            grid-template-columns: 100px 60px 100px 1fr 80px 80px;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .daily-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .daily-day {
+            font-weight: 500;
+        }
+
+        .daily-icon {
+            font-size: 2em;
+            text-align: center;
+        }
+
+        .daily-temps {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .temp-max {
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+
+        .temp-min {
+            font-size: 1em;
+            opacity: 0.7;
+        }
+
+        .daily-desc {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .daily-rain {
+            font-size: 0.85em;
+            color: #64b5f6;
+        }
+
+        .daily-wind {
+            font-size: 0.85em;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .temp-large {
+                font-size: 3.5em;
+            }
+
+            .weather-icon-large {
+                font-size: 3.5em;
+            }
+
+            .current-main {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .current-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .daily-item {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .daily-temps {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="location">Croissy-sur-Seine, France 🏠</div>
+        </div>
+
+        <div class="current-weather-section">
+            <div class="current-header">Current weather</div>
+            <div class="current-time" id="current-time"></div>
+
+            <div class="current-main">
+                <div class="temp-display">
+                    <div class="weather-icon-large" id="current-icon">🌙</div>
+                    <div class="temp-large" id="current-temp">--°</div>
+                </div>
+
+                <div class="weather-description">
+                    <div class="description-main" id="current-desc">Loading...</div>
+                    <div class="description-detail" id="current-feels">Feels like --°</div>
+                </div>
+            </div>
+
+            <div class="current-details">
+                <div class="detail-item">
+                    <div class="detail-label">💨 Wind</div>
+                    <div class="detail-value" id="current-wind">-- km/h</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">💧 Humidity</div>
+                    <div class="detail-value" id="current-humidity">--%</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">👁️ Visibility</div>
+                    <div class="detail-value" id="current-visibility">-- km</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">🌡️ Pressure</div>
+                    <div class="detail-value" id="current-pressure">-- mb</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">💧 Dew point</div>
+                    <div class="detail-value" id="current-dew">--°</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">☁️ Cloud cover</div>
+                    <div class="detail-value" id="current-clouds">--%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs-section">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('overview')">Overview</button>
+                <button class="tab" onclick="switchTab('precipitation')">Precipitation</button>
+                <button class="tab" onclick="switchTab('wind')">Wind</button>
+                <button class="tab" onclick="switchTab('humidity')">Humidity</button>
+                <button class="tab" onclick="switchTab('cloud')">Cloud cover</button>
+            </div>
+
+            <div id="overview" class="tab-content active">
+                <div class="chart-title">Hourly forecast</div>
+                <div class="hourly-grid" id="hourly-forecast"></div>
+            </div>
+
+            <div id="precipitation" class="tab-content">
+                <div class="precipitation-chart">
+                    <div class="chart-title">Precipitation - Next 24 hours</div>
+                    <div class="hourly-grid" id="precip-hourly"></div>
+                </div>
+            </div>
+
+            <div id="wind" class="tab-content">
+                <div class="precipitation-chart">
+                    <div class="chart-title">Wind - Next 24 hours</div>
+                    <div class="hourly-grid" id="wind-hourly"></div>
+                </div>
+            </div>
+
+            <div id="humidity" class="tab-content">
+                <div class="precipitation-chart">
+                    <div class="chart-title">Humidity - Next 24 hours</div>
+                    <div class="hourly-grid" id="humidity-hourly"></div>
+                </div>
+            </div>
+
+            <div id="cloud" class="tab-content">
+                <div class="precipitation-chart">
+                    <div class="chart-title">Cloud cover - Next 24 hours</div>
+                    <div class="hourly-grid" id="cloud-hourly"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="daily-forecast">
+            <div class="daily-title">7-day forecast</div>
+            <div class="daily-list" id="daily-forecast"></div>
+        </div>
+    </div>
+
+    <script>
+        const latitude = 48.8797;
+        const longitude = 2.1439;
+
+        const weatherCodes = {
+            0: { description: 'Clear sky', iconDay: '☀️', iconNight: '🌙' },
+            1: { description: 'Mainly clear', iconDay: '🌤️', iconNight: '🌙' },
+            2: { description: 'Partly cloudy', iconDay: '⛅', iconNight: '☁️' },
+            3: { description: 'Overcast', iconDay: '☁️', iconNight: '☁️' },
+            45: { description: 'Foggy', iconDay: '🌫️', iconNight: '🌫️' },
+            48: { description: 'Foggy', iconDay: '🌫️', iconNight: '🌫️' },
+            51: { description: 'Light drizzle', iconDay: '🌦️', iconNight: '🌧️' },
+            53: { description: 'Drizzle', iconDay: '🌦️', iconNight: '🌧️' },
+            55: { description: 'Heavy drizzle', iconDay: '🌧️', iconNight: '🌧️' },
+            61: { description: 'Light rain', iconDay: '🌧️', iconNight: '🌧️' },
+            63: { description: 'Rain', iconDay: '🌧️', iconNight: '🌧️' },
+            65: { description: 'Heavy rain', iconDay: '⛈️', iconNight: '⛈️' },
+            71: { description: 'Light snow', iconDay: '🌨️', iconNight: '🌨️' },
+            73: { description: 'Snow', iconDay: '❄️', iconNight: '❄️' },
+            75: { description: 'Heavy snow', iconDay: '❄️', iconNight: '❄️' },
+            77: { description: 'Snow grains', iconDay: '❄️', iconNight: '❄️' },
+            80: { description: 'Light showers', iconDay: '🌦️', iconNight: '🌧️' },
+            81: { description: 'Showers', iconDay: '🌧️', iconNight: '🌧️' },
+            82: { description: 'Heavy showers', iconDay: '⛈️', iconNight: '⛈️' },
+            85: { description: 'Light snow showers', iconDay: '🌨️', iconNight: '🌨️' },
+            86: { description: 'Snow showers', iconDay: '❄️', iconNight: '❄️' },
+            95: { description: 'Thunderstorm', iconDay: '⛈️', iconNight: '⛈️' },
+            96: { description: 'Thunderstorm with hail', iconDay: '⛈️', iconNight: '⛈️' },
+            99: { description: 'Thunderstorm with hail', iconDay: '⛈️', iconNight: '⛈️' }
+        };
+
+        function isNightTime(dateString) {
+            const date = new Date(dateString);
+            const hour = date.getHours();
+            return hour < 6 || hour >= 20;
+        }
+
+        function getWeatherIcon(code, dateString) {
+            const weather = weatherCodes[code] || { iconDay: '🌡️', iconNight: '🌡️' };
+            return isNightTime(dateString) ? weather.iconNight : weather.iconDay;
+        }
+
+        function getWeatherDescription(code) {
+            return (weatherCodes[code] || { description: 'Unknown' }).description;
+        }
+
+        function updateCurrentTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('fr-FR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function getDayName(dateString) {
+            const date = new Date(dateString);
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            if (date.toDateString() === today.toDateString()) return 'Today';
+            if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+            return date.toLocaleDateString('en-US', { weekday: 'long' });
+        }
+
+        async function fetchWeather() {
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,cloud_cover,wind_speed_10m,pressure_msl,visibility&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,relative_humidity_2m,cloud_cover,dewpoint_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max&timezone=Europe%2FParis`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                displayCurrentWeather(data.current, data.hourly);
+                displayHourlyForecast(data.hourly);
+                displayDailyForecast(data.daily);
+                displayPrecipitationTab(data.hourly);
+                displayWindTab(data.hourly);
+                displayHumidityTab(data.hourly);
+                displayCloudTab(data.hourly);
+
+            } catch (error) {
+                console.error('Error fetching weather:', error);
+            }
+        }
+
+        function displayCurrentWeather(current, hourly) {
+            const icon = getWeatherIcon(current.weather_code, new Date().toISOString());
+            const description = getWeatherDescription(current.weather_code);
+
+            document.getElementById('current-icon').textContent = icon;
+            document.getElementById('current-temp').textContent = Math.round(current.temperature_2m) + '°C';
+            document.getElementById('current-desc').textContent = description;
+            document.getElementById('current-feels').textContent = `Feels like ${Math.round(current.apparent_temperature)}°`;
+            document.getElementById('current-wind').textContent = Math.round(current.wind_speed_10m) + ' km/h';
+            document.getElementById('current-humidity').textContent = current.relative_humidity_2m + '%';
+            document.getElementById('current-visibility').textContent = (current.visibility / 1000).toFixed(1) + ' km';
+            document.getElementById('current-pressure').textContent = Math.round(current.pressure_msl) + ' mb';
+            document.getElementById('current-dew').textContent = Math.round(hourly.dewpoint_2m[0]) + '°';
+            document.getElementById('current-clouds').textContent = current.cloud_cover + '%';
+        }
+
+        function displayHourlyForecast(hourly) {
+            const container = document.getElementById('hourly-forecast');
+            let html = '';
+
+            for (let i = 0; i < 24; i++) {
+                const date = new Date(hourly.time[i]);
+                const icon = getWeatherIcon(hourly.weather_code[i], hourly.time[i]);
+                const time = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+                html += `
+                    <div class="hourly-item">
+                        <div class="hourly-time">${time}</div>
+                        <div class="hourly-icon">${icon}</div>
+                        <div class="hourly-temp">${Math.round(hourly.temperature_2m[i])}°</div>
+                        <div class="hourly-precip">💧 ${hourly.precipitation_probability[i]}%</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function displayPrecipitationTab(hourly) {
+            const container = document.getElementById('precip-hourly');
+            let html = '';
+
+            for (let i = 0; i < 24; i++) {
+                const date = new Date(hourly.time[i]);
+                const time = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+                html += `
+                    <div class="hourly-item">
+                        <div class="hourly-time">${time}</div>
+                        <div class="hourly-temp">${hourly.precipitation_probability[i]}%</div>
+                        <div class="hourly-precip">${hourly.precipitation[i]} mm</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function displayWindTab(hourly) {
+            const container = document.getElementById('wind-hourly');
+            let html = '';
+
+            for (let i = 0; i < 24; i++) {
+                const date = new Date(hourly.time[i]);
+                const time = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+                html += `
+                    <div class="hourly-item">
+                        <div class="hourly-time">${time}</div>
+                        <div class="hourly-temp">${Math.round(hourly.wind_speed_10m[i])} km/h</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function displayHumidityTab(hourly) {
+            const container = document.getElementById('humidity-hourly');
+            let html = '';
+
+            for (let i = 0; i < 24; i++) {
+                const date = new Date(hourly.time[i]);
+                const time = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+                html += `
+                    <div class="hourly-item">
+                        <div class="hourly-time">${time}</div>
+                        <div class="hourly-temp">${hourly.relative_humidity_2m[i]}%</div>
+                        <div class="hourly-precip">Dew: ${Math.round(hourly.dewpoint_2m[i])}°</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function displayCloudTab(hourly) {
+            const container = document.getElementById('cloud-hourly');
+            let html = '';
+
+            for (let i = 0; i < 24; i++) {
+                const date = new Date(hourly.time[i]);
+                const time = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+                html += `
+                    <div class="hourly-item">
+                        <div class="hourly-time">${time}</div>
+                        <div class="hourly-temp">${hourly.cloud_cover[i]}%</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function displayDailyForecast(daily) {
+            const container = document.getElementById('daily-forecast');
+            let html = '';
+
+            for (let i = 0; i < 7; i++) {
+                const icon = getWeatherIcon(daily.weather_code[i], daily.time[i] + 'T12:00:00');
+                const description = getWeatherDescription(daily.weather_code[i]);
+                const dayName = getDayName(daily.time[i]);
+                const date = new Date(daily.time[i]);
+                const dateStr = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+
+                html += `
+                    <div class="daily-item">
+                        <div class="daily-day">${dayName}<br><span style="opacity:0.6; font-size:0.85em">${dateStr}</span></div>
+                        <div class="daily-icon">${icon}</div>
+                        <div class="daily-temps">
+                            <span class="temp-max">${Math.round(daily.temperature_2m_max[i])}°</span>
+                            <span class="temp-min">${Math.round(daily.temperature_2m_min[i])}°</span>
+                        </div>
+                        <div class="daily-desc">${description}</div>
+                        <div class="daily-rain">💧 ${daily.precipitation_probability_max[i]}% | ${daily.precipitation_sum[i]} mm</div>
+                        <div class="daily-wind">💨 ${Math.round(daily.wind_speed_10m_max[i])} km/h</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 60000);
+        fetchWeather();
+        setInterval(fetchWeather, 600000);
+    </script>
+</body>
+</html>
